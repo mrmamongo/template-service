@@ -1,0 +1,18 @@
+[api]
+project_name = "ergpt backend"
+host = "0.0.0.0"
+port = 3000
+
+cors_origins = ["*"]
+allow_headers = ["*"]
+allow_methods = ["*"]
+
+[database]
+host = "postgres"
+port = 5432
+username = "postgres"
+password = "example"
+database = "postgres"
+
+[logging]
+level = "DEBUG"
