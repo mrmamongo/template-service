@@ -10,18 +10,14 @@ ROUTER = APIRouter(route_class=DishkaRoute)
 
 
 @ROUTER.get('/login')
-async def login_route(
-        request: Request,
-        oauth: FromDishka[OAuth]
-):
-    """Логин пользователя в Keycloak."""
+async def login_route(request: Request, oauth: FromDishka[OAuth]) -> RedirectResponse:
+    """Логин пользователя."""
     return await oauth.google.authorize_redirect(request, request.url_for('auth_route'))
 
+
 @ROUTER.get('/auth')
-async def auth_route(
-        request: Request,
-        oauth: FromDishka[OAuth]
-):
+async def auth_route(request: Request, oauth: FromDishka[OAuth]) -> RedirectResponse:
+    """Auth callback для google OAuth."""
     try:
         token = await oauth.google.authorize_access_token(request)
     except OAuthError as error:
@@ -33,9 +29,7 @@ async def auth_route(
 
 
 @ROUTER.get('/logout')
-async def logout_route(
-        request: Request
-):
+async def logout_route(request: Request) -> RedirectResponse:
     """Логаут пользователя в keycloak."""
     request.session.pop('user', None)
     return RedirectResponse(url='/')

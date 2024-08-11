@@ -2,8 +2,6 @@ from collections.abc import Awaitable
 from collections.abc import Callable
 from typing import TypeVar
 
-import orjson
-
 from fastapi import FastAPI
 from jwcrypto.common import JWException
 from loguru import logger
@@ -13,10 +11,6 @@ from starlette.responses import JSONResponse
 
 from src.application.errors import BaseError
 from src.application.errors import BaseErrorGroup
-from src.application.errors import DatabaseError
-from src.application.errors import NotAuthorizedError
-from src.application.errors import NotFoundError
-from src.application.errors import UniqueError
 
 TError = TypeVar('TError', bound=BaseError)
 
@@ -28,6 +22,7 @@ async def _jwexception_error_handler(
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED, content={'errors': [str(error)]}
     )
+
 
 def _make_exception_handler(
     ex_type: type[TError],

@@ -5,7 +5,6 @@ from dataclasses import field
 
 from adaptix import Retort
 from dynaconf import Dynaconf
-from loguru import logger
 
 
 @dataclass(slots=True)
@@ -70,7 +69,9 @@ class Config:
 def get_config() -> Config:
     """Парсинг dotenv и получение конфига."""
     dynaconf = Dynaconf(
-        settings_files=[os.getenv('CONFIG_PATH')], envvar_prefix='TEMPLATE', load_dotenv=True  # TODO: Поменять на свое
+        settings_files=[os.getenv('CONFIG_PATH')],
+        envvar_prefix='TEMPLATE',
+        load_dotenv=True,  # TODO: Поменять на свое
     )
     retort = Retort()
 

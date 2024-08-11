@@ -10,6 +10,7 @@ from src.main.di import DishkaProvider
 from src.main.security import SecurityProvider
 from src.main.web import setup_fastapi
 
+
 def app() -> FastAPI:
     """Инициализация основного приложения."""
     config: Config = get_config()

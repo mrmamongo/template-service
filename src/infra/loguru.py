@@ -15,6 +15,7 @@ from src.config import LoggingConfig
 
 def setup_logging(config: LoggingConfig) -> None:
     """Метод инициализации логеров."""
+
     def serialize_extra(record: Any) -> str:
         """Сериализуем дополнительную информацию.
 

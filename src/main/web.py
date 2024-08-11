@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from src.config import ApiConfig, Config
+from src.config import Config
 from src.infra.metrics import setup_metrics
 from src.presentation.fastapi.setup import setup_routes
 

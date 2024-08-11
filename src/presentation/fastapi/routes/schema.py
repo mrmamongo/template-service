@@ -6,6 +6,7 @@ from typing import TypeVar
 TWithSchema = TypeVar('TWithSchema')
 TSchema = TypeVar('TSchema')
 
+
 @dataclass
 class WithSchema(Generic[TWithSchema, TSchema]):
     with_data: TWithSchema

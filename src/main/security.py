@@ -7,11 +7,13 @@ from dishka import provide
 from fastapi import HTTPException
 from fastapi import Request
 from starlette import status
-from starlette.config import Config as StarletteConfig
 
 from src.application.enums.role import RoleEnum
 from src.application.schema.auth import TokenSchema
-from src.application.schema.user import BaseUserSchema, UserSchema, AdminUserSchema, AnyUserSchema
+from src.application.schema.user import AdminUserSchema
+from src.application.schema.user import AnyUserSchema
+from src.application.schema.user import BaseUserSchema
+from src.application.schema.user import UserSchema
 from src.application.services.auth import AuthService
 from src.config import AuthConfig
 
@@ -29,17 +31,15 @@ class SecurityProvider(Provider):
             server_metadata_url=auth_config.metadata_url,
             client_id=auth_config.client_id,
             client_secret=auth_config.client_secret,
-            client_kwargs={
-                'scope': 'openid email profile'
-            }
+            client_kwargs={'scope': 'openid email profile'},
         )
         return oauth
 
     @provide(scope=Scope.REQUEST)
     async def _get_tokens_schema_optional(self, request: Request) -> TokenSchema | None:
         if (
-                'access_token' not in request.cookies
-                or 'refresh_token' not in request.cookies
+            'access_token' not in request.cookies
+            or 'refresh_token' not in request.cookies
         ):
             return None
 
@@ -57,33 +57,30 @@ class SecurityProvider(Provider):
         return tokens
 
     @provide(scope=Scope.REQUEST)
-    async def _authenticated(
-            self, tokens: TokenSchema
-    ) -> BaseUserSchema:
+    async def _authenticated(self, tokens: TokenSchema) -> BaseUserSchema:
         """Authenticates a user with a token."""
 
     @provide(scope=Scope.REQUEST)
     async def _authenticated_optional(
-            self, tokens: TokenSchema | None) -> BaseUserSchema | None:
+        self, tokens: TokenSchema | None
+    ) -> BaseUserSchema | None:
         """Authenticate user optionally with a token."""
 
     @provide(scope=Scope.REQUEST)
-    async def _any_user(
-            self, user: BaseUserSchema
-    ) -> AnyUserSchema:
+    async def _any_user(self, user: BaseUserSchema) -> AnyUserSchema:
         """Ensure any user has access to resource."""
         return cast(AnyUserSchema, user)
 
     @provide(scope=Scope.REQUEST)
     async def _authorized_user(
-            self, user: BaseUserSchema, authorization_service: AuthService
+        self, user: BaseUserSchema, authorization_service: AuthService
     ) -> UserSchema:
         authorization_service.ensure_has_access(user, RoleEnum.USER.value)
         return cast(UserSchema, user)
 
     @provide(scope=Scope.REQUEST)
     async def _authorized_admin(
-            self, user: BaseUserSchema, authorization_service: AuthService
+        self, user: BaseUserSchema, authorization_service: AuthService
     ) -> AdminUserSchema:
         authorization_service.ensure_has_access(user, RoleEnum.ADMIN.value)
         return cast(AdminUserSchema, user)
