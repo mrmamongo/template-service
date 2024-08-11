@@ -1,46 +1,41 @@
+from authlib.integrations.base_client import OAuthError
+from authlib.integrations.starlette_client import OAuth
+from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter
-from fastapi import Response
-from starlette import status
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
 
 ROUTER = APIRouter(route_class=DishkaRoute)
 
 
-@ROUTER.post('/register', status_code=status.HTTP_201_CREATED)
-async def register(
-    response: Response,
-) -> None:
-    """Регистрирует пользователя в Keycloak."""
-    tokens = object()
-    # await generate_avatar_url.kiq(user_id=user_id, username=data.username)
-    response.set_cookie('access_token', tokens.access_token, httponly=True)
-    response.set_cookie('refresh_token', tokens.refresh_token, httponly=True)
-
-
-@ROUTER.post('/login')
+@ROUTER.get('/login')
 async def login_route(
-    response: Response,
-) -> None:
+        request: Request,
+        oauth: FromDishka[OAuth]
+):
     """Логин пользователя в Keycloak."""
-    tokens = object()
-    response.set_cookie('access_token', tokens.access_token, httponly=True)
-    response.set_cookie('refresh_token', tokens.refresh_token, httponly=True)
+    return await oauth.google.authorize_redirect(request, request.url_for('auth_route'))
+
+@ROUTER.get('/auth')
+async def auth_route(
+        request: Request,
+        oauth: FromDishka[OAuth]
+):
+    try:
+        token = await oauth.google.authorize_access_token(request)
+    except OAuthError as error:
+        raise error
+    user = token.get('userinfo')
+    if user:
+        request.session['user'] = dict(user)
+    return RedirectResponse(url='/')
 
 
-@ROUTER.post('/refresh-token')
-async def refresh_token(
-    response: Response,
-) -> None:
-    """Обновление токена."""
-    tokens = object()
-    response.set_cookie('access_token', tokens.access_token, httponly=True)
-    response.set_cookie('refresh_token', tokens.refresh_token, httponly=True)
-
-
-@ROUTER.post('/logout')
+@ROUTER.get('/logout')
 async def logout_route(
-    response: Response,
-) -> None:
+        request: Request
+):
     """Логаут пользователя в keycloak."""
-    response.delete_cookie('access_token', httponly=True)
-    response.delete_cookie('refresh_token', httponly=True)
+    request.session.pop('user', None)
+    return RedirectResponse(url='/')

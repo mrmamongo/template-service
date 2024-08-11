@@ -5,6 +5,7 @@ from dataclasses import field
 
 from adaptix import Retort
 from dynaconf import Dynaconf
+from loguru import logger
 
 
 @dataclass(slots=True)
@@ -13,6 +14,7 @@ class ApiConfig:
     port: int
 
     templates_dir: str
+
     debug: bool = False
     workers: int = 1
     cors_origins: list[str] = field(default_factory=list)
@@ -29,6 +31,14 @@ class ApiConfig:
 
 
 @dataclass(slots=True)
+class AuthConfig:
+    secret_key: str
+    client_id: str
+    client_secret: str
+    metadata_url: str = 'https://accounts.google.com/.well-known/openid-configuration'
+
+
+@dataclass(slots=True)
 class DatabaseConfig:
     host: str
     port: int
@@ -42,6 +52,7 @@ class DatabaseConfig:
         """Сборка dsn для базы данных."""
         return f'{self.driver}://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}'
 
+
 @dataclass(slots=True)
 class LoggingConfig:
     level: str
@@ -51,6 +62,7 @@ class LoggingConfig:
 @dataclass(slots=True)
 class Config:
     api: ApiConfig
+    auth: AuthConfig
     database: DatabaseConfig
     logging: LoggingConfig
 
@@ -58,7 +70,7 @@ class Config:
 def get_config() -> Config:
     """Парсинг dotenv и получение конфига."""
     dynaconf = Dynaconf(
-        settings_files=['../config.toml'], envvar_prefix='TEMPLATE', load_dotenv=True # TODO: Поменять на свое
+        settings_files=[os.getenv('CONFIG_PATH')], envvar_prefix='TEMPLATE', load_dotenv=True  # TODO: Поменять на свое
     )
     retort = Retort()
 

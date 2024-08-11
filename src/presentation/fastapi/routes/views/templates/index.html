@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>Hello FastAPI-HTMX</title>
+</head>
+<body>
+{% if user %}
+    <pre>{{ user }}</pre>
+    <a href="/api/auth/logout">logout</a>
+{% else %}
+    <a href="/api/auth/login">login</a>
+{% endif %}
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+</body>
+</html>

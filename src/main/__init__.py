@@ -10,15 +10,14 @@ from src.main.di import DishkaProvider
 from src.main.security import SecurityProvider
 from src.main.web import setup_fastapi
 
-config: Config = get_config()
-setup_logging(config.logging)
-
-
 def app() -> FastAPI:
     """Инициализация основного приложения."""
+    config: Config = get_config()
+    setup_logging(config.logging)
+
     container = make_async_container(DishkaProvider(config=config), SecurityProvider())
     logger.info('Initializing fastapi')
-    fastapi = setup_fastapi(config.api)
+    fastapi = setup_fastapi(config)
     setup_dishka_fastapi(container, fastapi)
 
     return fastapi

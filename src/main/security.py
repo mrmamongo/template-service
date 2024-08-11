@@ -1,19 +1,40 @@
 from typing import cast
 
+from authlib.integrations.starlette_client import OAuth
 from dishka import Provider
 from dishka import Scope
 from dishka import provide
 from fastapi import HTTPException
 from fastapi import Request
 from starlette import status
+from starlette.config import Config as StarletteConfig
 
 from src.application.enums.role import RoleEnum
 from src.application.schema.auth import TokenSchema
 from src.application.schema.user import BaseUserSchema, UserSchema, AdminUserSchema, AnyUserSchema
 from src.application.services.auth import AuthService
+from src.config import AuthConfig
 
 
 class SecurityProvider(Provider):
+    @provide(scope=Scope.APP)
+    async def _get_auth_service(self) -> AuthService:
+        return AuthService(client_id='test')
+
+    @provide(scope=Scope.APP)
+    async def _get_oauth_config(self, auth_config: AuthConfig) -> OAuth:
+        oauth = OAuth()
+        oauth.register(
+            name='google',
+            server_metadata_url=auth_config.metadata_url,
+            client_id=auth_config.client_id,
+            client_secret=auth_config.client_secret,
+            client_kwargs={
+                'scope': 'openid email profile'
+            }
+        )
+        return oauth
+
     @provide(scope=Scope.REQUEST)
     async def _get_tokens_schema_optional(self, request: Request) -> TokenSchema | None:
         if (

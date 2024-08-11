@@ -6,7 +6,6 @@ import orjson
 
 from fastapi import FastAPI
 from jwcrypto.common import JWException
-from keycloak.exceptions import KeycloakError
 from loguru import logger
 from starlette import status
 from starlette.requests import Request
@@ -29,31 +28,6 @@ async def _jwexception_error_handler(
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED, content={'errors': [str(error)]}
     )
-
-
-async def _keycloak_error_handler(
-    request: Request, error: KeycloakError
-) -> JSONResponse:
-    error_message = None
-    if len(error.error_message) > 0:
-        try:
-            error_message = orjson.loads(error.error_message)
-        except orjson.JSONDecodeError:
-            error_message = error.error_message
-
-    match error_message:
-        case {'errorMessage': message}:
-            error_message = message
-        case {'error_description': message}:
-            error_message = message
-        case _:
-            error_message = error_message
-    logger.error(str(error))
-    return JSONResponse(
-        status_code=error.response_code or status.HTTP_401_UNAUTHORIZED,
-        content={'errors': [error_message]},
-    )
-
 
 def _make_exception_handler(
     ex_type: type[TError],
@@ -82,13 +56,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
     """Установка обработчиков ошибок FastAPI."""
     for exc_type in [
         BaseError,
-        DatabaseError,
-        NotFoundError,
-        UniqueError,
-        NotAuthorizedError,
     ]:
         app.exception_handler(exc_type)(_make_exception_handler(exc_type))
     app.exception_handler(BaseErrorGroup)(_exception_group_handler)
-    app.exception_handler(KeycloakError)(_keycloak_error_handler)
-
     app.exception_handler(JWException)(_jwexception_error_handler)

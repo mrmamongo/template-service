@@ -11,9 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
+from starlette.templating import Jinja2Templates
 from starlette.websockets import WebSocket
 
-from src.config import Config
+from src.config import Config, AuthConfig
 
 
 class DishkaProvider(Provider):
@@ -23,6 +24,14 @@ class DishkaProvider(Provider):
     ) -> None:
         self.config = config
         super().__init__()
+
+    @provide(scope=Scope.APP)
+    async def _get_auth_config(self) -> AuthConfig:
+        return self.config.auth
+
+    @provide(scope=Scope.APP)
+    async def _get_jinja_templates(self) -> Jinja2Templates:
+        return Jinja2Templates(directory=self.config.api.templates_dir)
 
     @provide(scope=Scope.APP)
     async def _get_engine(self) -> AsyncIterable[AsyncEngine]:
