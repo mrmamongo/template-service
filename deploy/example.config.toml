@@ -1,5 +1,5 @@
 [api]
-project_name = "ergpt backend"
+project_name = "template service"
 host = "0.0.0.0"
 port = 3000
 

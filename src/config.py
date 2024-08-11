@@ -58,7 +58,7 @@ class Config:
 def get_config() -> Config:
     """Парсинг dotenv и получение конфига."""
     dynaconf = Dynaconf(
-        settings_files=['../config.toml'], envvar_prefix='ERGPT', load_dotenv=True
+        settings_files=['../config.toml'], envvar_prefix='TEMPLATE', load_dotenv=True # TODO: Поменять на свое
     )
     retort = Retort()
 
